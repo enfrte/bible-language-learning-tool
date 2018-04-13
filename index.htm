@@ -100,7 +100,9 @@
       </div>
     </div>
   </div>
-  
+
+  <p class="text-center small"><a href="http://vlexofree.com/">Hosting provided by VlexoFree</a></p>
+
 </div>
 
 <!-- Layout of the Bible - Books/Chapters/Verses Source = https://github.com/bkuhl/bible-verse-counts-per-chapter/blob/master/bible.json -->
@@ -108,8 +110,6 @@
 <script src="js/api-languages.min.js"></script>
 
 <script>
-
-//var book, chapter, verse, numberOfChapters, numberOfChapterVerses, language1, language2, language1VerseNumber, language2VerseNumber, textDirection, prevDisabled, nextDisabled;
 
 // app.$data.bibleContent is avaiable from js/bible.min.js
 // app.$data.languages is available from js/api-languages.min.js
@@ -150,7 +150,7 @@ var app = new Vue({
   },
 
   created () {
-
+    // restore backed up settings 
     this.book = localStorage.book || 'Genesis';
     this.chapter = parseInt(localStorage.chapter || 1);
     this.verse = parseInt(localStorage.verse || 1);
@@ -168,7 +168,7 @@ var app = new Vue({
   methods: {
 
     saveSettings: function(){
-
+      // save data properties to web storage
       localStorage.book = this.book; // shortcut for localStorage.setItem('book', this.book);
       localStorage.chapter = this.chapter;
       localStorage.verse = this.verse;
@@ -181,7 +181,6 @@ var app = new Vue({
       localStorage.textDirection = this.textDirection;
       localStorage.prevDisabled = this.prevDisabled;
       localStorage.nextDisabled = this.nextDisabled;
-      
     },
 
     clearSettings: function(){
