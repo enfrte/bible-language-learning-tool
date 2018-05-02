@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
-<title>Bible Language</title>
+<title>Bible Language Learning Tool</title>
 
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 <!-- development version, includes helpful console warnings -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <!-- production version -->
-<script src="js/vue.min.js"></script>
+<!-- <script src="js/vue.min.js"></script> -->
 
 <style>
   @media (min-width: 768px) { 
@@ -198,12 +198,18 @@ var app = new Vue({
       }
     },
 
+    setPrevNextButtons: function() {
+      this.prevDisabled = (this.verse < 2) ? 1 : 0; 
+      this.nextDisabled = (this.verse >= this.numberOfChapterVerses) ? 1 : 0;
+    },
+
     setBook: function(book){
       this.book = book;
       // reset the chapter and verse after changing book
       this.chapter = 1;
       this.verse = 1;
       this.setChaptersAndVerses();
+      this.setPrevNextButtons();
       this.getVerses();
     },
 
@@ -211,6 +217,7 @@ var app = new Vue({
       this.chapter = chapter;
       this.verse = 1; // reset the verse after changing chapter
       this.setChaptersAndVerses();
+      this.setPrevNextButtons();
       this.getVerses();
     },
 
@@ -218,22 +225,19 @@ var app = new Vue({
       this.verse = verse;
       this.setChaptersAndVerses();
       // if the user selects the first of last verse through the verse menu, disable the appropriate button
-      this.prevDisabled = (this.verse < 2) ? 1 : 0; 
-      this.nextDisabled = (this.verse >= this.numberOfChapterVerses) ? 1 : 0;
+      this.setPrevNextButtons();
       this.getVerses();
     },
     
     prev: function(){
       this.verse -= 1;
-      this.prevDisabled = (this.verse < 2) ? 1 : 0; 
-      this.nextDisabled = (this.verse >= this.numberOfChapterVerses) ? 1 : 0;
+      this.setPrevNextButtons();
       this.getVerses();
     },
     
     next: function(){
       this.verse += 1;
-      this.prevDisabled = (this.verse < 2) ? 1 : 0; 
-      this.nextDisabled = (this.verse >= this.numberOfChapterVerses) ? 1 : 0;
+      this.setPrevNextButtons();
       this.getVerses();
     },
 
@@ -261,6 +265,7 @@ var app = new Vue({
         data: 'p=' + app.book + app.chapter + ':' + app.verse + '&v=' + app.language1,
         jsonp: 'getbible',
         success:function(json){
+          app.error = ''; 
           // set text direction
           app.textDirection = (json.direction == 'RTL') ? "rtl" : "ltr";
           // check response type

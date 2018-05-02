@@ -19,6 +19,5 @@ Live demo: http://codinginthecold.tk/demos/bllt/
 
 * Thanks to the good folks at http://getbible.net/ for the use of their API.
 * Thanks to https://github.com/bkuhl/bible-verse-counts-per-chapter/blob/master/bible.json for the json. 
-* This project was done in a bit of a rush, because I'm currently working on a bigger project. 
-* At some point I'll start writing Vue apps with components :P
+* I'm new to Vue so the code is not very well structured. At some point I'll start writing Vue apps with components :P
 * I haven't tested this well with all the different languages. 
