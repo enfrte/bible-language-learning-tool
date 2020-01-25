@@ -8,7 +8,7 @@ This app displays side-by-side bible verse translations in various languages. Th
 
 ## Demo
 
-Live demo: http://codinginthecold.tk/demos/bllt/
+Live demo: http://codinginthecold.byethost5.com/demos/bllt/
 
 ## Features
 
