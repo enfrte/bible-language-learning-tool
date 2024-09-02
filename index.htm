@@ -254,64 +254,70 @@ var app = new Vue({
       this.language1Verse = 'Loading...';
       this.language2Verse = 'Loading...';
 
-      // Using jQuery for the ajax call because it's convenient with jsonp
 
-      // Language1
-      jQuery.ajax({
-        url:'http://getbible.net/json',
-        dataType: 'jsonp',
-        data: 'p=' + app.book + app.chapter + ':' + app.verse + '&v=' + app.language1,
-        jsonp: 'getbible',
-        success:function(json){
+      // Language 1 request
+
+      const lang1_url = `https://query.getbible.net/v2/${app.language1}/${app.book}${app.chapter}:${app.verse}`;
+
+      fetch(lang1_url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(json => {
           app.error = ''; 
-          // set text direction
-          app.textDirection = (json.direction == 'RTL') ? "rtl" : "ltr";
-          // check response type
-          if (json.type == 'verse') {
-            jQuery.each(json.book, function(index, value) {
-              app.book = value.book_name; 
-              app.chapter = parseInt(value.chapter_nr); 
-              jQuery.each(value.chapter, function(index, value) {
-                app.language1Verse = value.verse;
-                app.language1VerseNumber = parseInt(value.verse_nr);
-              });
-            });
-          } 
-          else if (json.type == 'chapter'){ app.language1Verse = 'No chapter specified'; } 
-          else if (json.type == 'book'){ app.language1Verse = 'No chapter or verse specified'; }
-        },
-        error:function(){
-          app.error = 'Nothing was returned, please try again!'; 
-        },
-      });
+          app.textDirection = (json.direction === 'RTL') ? 'rtl' : 'ltr';
 
-      // Language2
-      jQuery.ajax({
-        url:'http://getbible.net/json',
-        dataType: 'jsonp',
-        data: 'p=' + app.book + app.chapter + ':' + app.verse + '&v=' + app.language2,
-        jsonp: 'getbible',
-        success:function(json){
-          // set text direction
-          app.textDirection = (json.direction == 'RTL') ? "rtl" : "ltr";
-          // check response type
-          if (json.type == 'verse'){
-            jQuery.each(json.book, function(index, value) {
-              app.book = value.book_name; 
-              app.chapter = parseInt(value.chapter_nr); 
-              jQuery.each(value.chapter, function(index, value) {
-                app.language2Verse = value.verse;
-                app.language2VerseNumber = parseInt(value.verse_nr);
-              });
-            });
-          } 
-          else if (json.type == 'chapter'){ app.language2Verse = 'No chapter specified'; } 
-          else if (json.type == 'book'){ app.language2Verse = 'No chapter or verse specified'; }
-        },
-        error:function(){
-          app.error = 'Nothing was returned, please try again!'; 
-        },
-      });  
+          // Returned data is one object. The format looks like kjv_1_1 
+          // This won't work for us because our book format is for example Genesis, so we can just use the first key
+          const dynamicKey = Object.keys(json)[0];
+          const data = json[dynamicKey];
+          console.log(data);
+
+          if (data.verses) {
+            app.book = data.book_name; 
+            app.chapter = parseInt(data.chapter, 10); 
+            app.language1Verse = data.verses[0].text;
+            app.language1VerseNumber = parseInt(data.verses[0].verse, 10);
+          }
+        })
+        .catch(() => {
+          app.error = 'Nothing was returned, please try again!';
+        });
+
+      // Language 2 request 
+
+      const lang2_url = `https://query.getbible.net/v2/${app.language2}/${app.book}${app.chapter}:${app.verse}`;
+
+      fetch(lang2_url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(json => {
+          app.error = ''; 
+          app.textDirection = (json.direction === 'RTL') ? 'rtl' : 'ltr';
+
+          // Returned data is one object. The format looks like kjv_1_1 
+          // This won't work for us because our book format is for example Genesis, so we can just use the first key
+          const dynamicKey = Object.keys(json)[0];
+          const data = json[dynamicKey];
+          console.log(data);
+
+          if (data.verses) {
+            app.book = data.book_name; 
+            app.chapter = parseInt(data.chapter, 10); 
+            app.language2Verse = data.verses[0].text;
+            app.language2VerseNumber = parseInt(data.verses[0].verse, 10);
+          }
+        })
+        .catch(() => {
+          app.error = 'Nothing was returned, please try again!';
+        });
 
     },
 

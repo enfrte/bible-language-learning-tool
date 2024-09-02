@@ -1,0 +1,3 @@
+ 
+
+GET https://query.getbible.net/v2/kjv/Genesis1:1
