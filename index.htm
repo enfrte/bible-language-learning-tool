@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Bible Language Learning Tool</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+
+<!-- development version, includes helpful console warnings -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+<!-- production version -->
+<script src="js/vue.min.js"></script>
+
+<style>
+	@media (min-width: 768px) { 
+		.container {
+			max-width: 500px;
+		}
+	}
+	body {
+		background-color: #222;
+	}
+	
+</style>
+
+</head>
+<body>
+
+<div id="app" class="container">
+	
+	<h5 class="text-white text-center mt-2">{{book}} <span class="badge badge-info">Chapter {{chapter}}</span></h5>
+
+	<div class="row mb-2">
+		<div class="col"><button type="button" v-bind:disabled="prevDisabled == 1 ? true : false" v-on:click="prev()" class="btn btn-block btn-secondary">Prev</button></div>
+		<div class="col"><button type="button" v-bind:disabled="nextDisabled == 1 ? true : false" v-on:click="next()" class="btn btn-block btn-secondary">Next</button></div>
+	</div>
+
+	<div class="card">
+		<div v-bind:style="{direction: textDirection}" class="card-body">
+			<sup>{{language1VerseNumber}} </sup>{{language1Verse}}{{error}}
+		</div>
+	</div>
+
+	<div class="card mt-2 mb-2">
+		<div v-bind:style="{direction: textDirection}" class="card-body">
+			<sup>{{language2VerseNumber}} </sup>{{language2Verse}}{{error}}
+		</div>
+	</div>
+
+	<button type="button" v-on:click="saveSettings()" class="btn btn-block btn-secondary">Save settings</button>
+
+	<button type="button" v-on:click="clearSettings()" class="btn btn-block btn-secondary">Clear settings</button>
+
+	<button type="button" v-on:click="showBooks = !showBooks; showChapters = false; showVerses = false" class="btn btn-block btn-primary mb-2">Book</button>
+	<div class="card mb-2" v-show="showBooks">
+		<div class="card-body">
+			<div class="list-group">
+				<div v-for="(book, key) in books" :key="key">
+					<button type="button" v-on:click="setBook(book.book); showBooks = false" class="list-group-item list-group-item-action">{{ book.book }}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<button type="button" v-on:click="showChapters = !showChapters; showBooks = false; showVerses = false" class="btn btn-block btn-info mb-2">Chapter</button>
+	<div class="card mb-2" v-show="showChapters">
+		<div class="card-body">
+			<div class="btn-group" role="group" aria-label="Chapters" v-for="chapterNumber in numberOfChapters">
+				<button type="button" v-on:click="setChapter(chapterNumber); showChapters = false" class="btn btn-info mt-1 mb-1 ml-1 mr-1">{{ chapterNumber }}</button>
+			</div>
+		</div>
+	</div>
+
+	<button type="button" v-on:click="showVerses = !showVerses; showChapters = false; showBooks = false" class="btn btn-block btn-success mb-2">Verse</button>
+	<div class="card mb-2" v-show="showVerses">
+		<div class="card-body">
+			<div class="btn-group" role="group" aria-label="Verses" v-for="verseNumber in numberOfChapterVerses">
+				<button type="button" v-on:click="setVerse(verseNumber); showVerses = false" class="btn btn-info mt-1 mb-1 ml-1 mr-1">{{ verseNumber }}</button>
+			</div>
+		</div>
+	</div>
+
+	<button type="button" v-on:click="showLang1 = !showLang1" class="btn btn-block btn-warning mb-2">Language 1</button>
+	<div class="card mb-2" v-show="showLang1">
+		<div class="card-body">
+			<div class="list-group">
+				<div v-for="(lang, key) in languages" :key="key">
+					<button type="button" v-on:click="setLang('lang1', lang.apiName); showLang1 = false" class="list-group-item list-group-item-action">{{ lang.name }}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<button type="button" v-on:click="showLang2 = !showLang2" class="btn btn-block btn-warning mb-2">Language 2</button>
+	<div class="card mb-2" v-show="showLang2">
+		<div class="card-body">
+			<div class="list-group">
+				<div v-for="(lang, key) in languages" :key="key">
+					<button type="button" v-on:click="setLang('lang2', lang.apiName); showLang2 = false" class="list-group-item list-group-item-action">{{ lang.name }}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<!-- Layout of the Bible - Books/Chapters/Verses Source = https://github.com/bkuhl/bible-verse-counts-per-chapter/blob/master/bible.json -->
+<script src="js/bible.min.js"></script>
+<script src="js/api-languages.min.js"></script>
+
+<script>
+// app.$data.bibleContent is avaiable from js/bible.min.js
+// app.$data.languages is available from js/api-languages.min.js
+
+var app = new Vue({
+	el: '#app',
+	
+	data: {
+		books: bibleContent,
+		showBooks: false,
+		showChapters: false,
+		showVerses: false,
+		showLang1: false,
+		showLang2: false,
+		book: 'Genesis',
+		chapter: 1,
+		verse: 1,
+		numberOfChapters: 50,
+		numberOfChapterVerses: 31,
+		languages: languages,
+		language1: 'kjv',
+		language2: 'esperanto',
+		language1Verse: 'Loading...',
+		language2Verse: 'Loading...',
+		language1VerseNumber: 1,
+		language2VerseNumber: 1,
+		textDirection: '',
+		prevDisabled: 1,
+		nextDisabled: 0,
+		error: '',
+	},
+
+	mounted: function () {
+		this.$nextTick(function () {
+			this.getVerses();
+		})
+	},
+
+	created () {
+		// restore backed up settings 
+		this.book = localStorage.book || 'Genesis';
+		this.chapter = parseInt(localStorage.chapter || 1);
+		this.verse = parseInt(localStorage.verse || 1);
+		this.numberOfChapters = parseInt(localStorage.numberOfChapters || 50);
+		this.numberOfChapterVerses = parseInt(localStorage.numberOfChapterVerses || 31);
+		this.language1 = localStorage.language1 || 'kjv';
+		this.language2 = localStorage.language2 || 'esperanto';
+		this.language1VerseNumber = parseInt(localStorage.language1VerseNumber || 1);
+		this.language2VerseNumber = parseInt(localStorage.language2VerseNumber || 1);
+		this.textDirection = localStorage.textDirection || '' ;
+		this.prevDisabled = parseInt(localStorage.prevDisabled || 1);
+		this.nextDisabled = parseInt(localStorage.nextDisabled || 0);
+	},
+
+	methods: {
+		// Save data properties to web storage
+		saveSettings: function(){
+				const dataToSave = [
+				'book', 'chapter', 'verse', 'numberOfChapters', 'numberOfChapterVerses',
+				'language1', 'language2', 'language1VerseNumber', 'language2VerseNumber',
+				'textDirection', 'prevDisabled', 'nextDisabled'
+			];
+		
+			dataToSave.forEach(key => localStorage[key] = this[key]);
+		},
+
+		clearSettings: function(){
+			localStorage.clear();
+		},
+		
+		setChaptersAndVerses: function(){
+			// set default values for book chapters and verses. When the app starts, the default is Genesis 1:1
+			for (var key in this.books) {
+			if(this.books[key].book == this.book){
+				this.numberOfChapters = this.books[key].chapters.length;
+				this.numberOfChapterVerses = parseInt(this.books[key].chapters[this.chapter - 1].verses); // verses from the first chapter
+			}
+			}
+		},
+
+		setPrevNextButtons: function() {
+			this.prevDisabled = (this.verse < 2) ? 1 : 0; 
+			this.nextDisabled = (this.verse >= this.numberOfChapterVerses) ? 1 : 0;
+		},
+
+		setBook: function(book){
+			this.book = book;
+			// reset the chapter and verse after changing book
+			this.chapter = 1;
+			this.verse = 1;
+			this.setChaptersAndVerses();
+			this.setPrevNextButtons();
+			this.getVerses();
+		},
+
+		setChapter: function(chapter){
+			this.chapter = chapter;
+			this.verse = 1; // reset the verse after changing chapter
+			this.setChaptersAndVerses();
+			this.setPrevNextButtons();
+			this.getVerses();
+		},
+
+		setVerse: function(verse){
+			this.verse = verse;
+			this.setChaptersAndVerses();
+			// if the user selects the first of last verse through the verse menu, disable the appropriate button
+			this.setPrevNextButtons();
+			this.getVerses();
+		},
+		
+		prev: function(){
+			this.verse -= 1;
+			this.setPrevNextButtons();
+			this.getVerses();
+		},
+		
+		next: function(){
+			this.verse += 1;
+			this.setPrevNextButtons();
+			this.getVerses();
+		},
+
+		setLang: function(languageNumber, apiLanguage){
+			if(languageNumber == 'lang1'){
+			this.language1 = apiLanguage;
+			}
+			else {
+			this.language2 = apiLanguage;
+			}
+			this.getVerses();
+		},
+
+		getVerses: function(){
+
+			this.language1Verse = 'Loading...';
+			this.language2Verse = 'Loading...';
+
+
+			// Language 1 request
+
+			const lang1_url = `https://query.getbible.net/v2/${app.language1}/${app.book}${app.chapter}:${app.verse}`;
+
+			fetch(lang1_url)
+			.then(response => {
+				if (!response.ok) {
+				throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(json => {
+				app.error = ''; 
+				app.textDirection = (json.direction === 'RTL') ? 'rtl' : 'ltr';
+
+				// Returned data is one object. The format looks like kjv_1_1 
+				// This won't work for us because our book format is for example Genesis, so we can just use the first key
+				const dynamicKey = Object.keys(json)[0];
+				const data = json[dynamicKey];
+
+				if (data.verses) {
+				app.book = data.book_name; 
+				app.chapter = parseInt(data.chapter, 10); 
+				app.language1Verse = data.verses[0].text;
+				app.language1VerseNumber = parseInt(data.verses[0].verse, 10);
+				}
+			})
+			.catch(() => {
+				app.error = 'Nothing was returned, please try again!';
+			});
+
+			// Language 2 request 
+
+			const lang2_url = `https://query.getbible.net/v2/${app.language2}/${app.book}${app.chapter}:${app.verse}`;
+
+			fetch(lang2_url)
+			.then(response => {
+				if (!response.ok) {
+				throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(json => {
+				app.error = ''; 
+				app.textDirection = (json.direction === 'RTL') ? 'rtl' : 'ltr';
+
+				// Returned data is one object. The format looks like kjv_1_1 
+				// This won't work for us because our book format is for example Genesis, so we can just use the first key
+				const dynamicKey = Object.keys(json)[0];
+				const data = json[dynamicKey];
+
+				if (data.verses) {
+				app.book = data.book_name; 
+				app.chapter = parseInt(data.chapter, 10); 
+				app.language2Verse = data.verses[0].text;
+				app.language2VerseNumber = parseInt(data.verses[0].verse, 10);
+				}
+			})
+			.catch(() => {
+				app.error = 'Nothing was returned, please try again!';
+			});
+		},
+	},
+});
+
+</script>
+<!-- Bootstrap requirements -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+
+</body>
+</html>
