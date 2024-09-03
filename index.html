@@ -7,12 +7,13 @@
 <title>Bible Language Learning Tool</title>
 
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
 
 <!-- development version, includes helpful console warnings -->
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
 <!-- production version -->
-<!-- <script src="js/vue.min.js"></script> -->
+<script src="js/vue.min.js"></script>
 
 <style>
   @media (min-width: 768px) { 
@@ -140,7 +141,6 @@ var app = new Vue({
     error: '',
   },
 
-  // I've used mounted with jQuery here because the api uses jsonp, and it's not supported with axios. 
   mounted: function () {
     this.$nextTick(function () {
       this.getVerses();
@@ -165,20 +165,28 @@ var app = new Vue({
 
   methods: {
 
-    saveSettings: function(){
-      // save data properties to web storage
-      localStorage.book = this.book; // shortcut for localStorage.setItem('book', this.book);
-      localStorage.chapter = this.chapter;
-      localStorage.verse = this.verse;
-      localStorage.numberOfChapters = this.numberOfChapters;
-      localStorage.numberOfChapterVerses = this.numberOfChapterVerses;
-      localStorage.language1 = this.language1;
-      localStorage.language2 = this.language2;
-      localStorage.language1VerseNumber = this.language1VerseNumber;
-      localStorage.language2VerseNumber = this.language2VerseNumber;
-      localStorage.textDirection = this.textDirection;
-      localStorage.prevDisabled = this.prevDisabled;
-      localStorage.nextDisabled = this.nextDisabled;
+      // Save data properties to web storage
+      saveSettings: function(){
+      // localStorage.book = this.book; // shortcut for localStorage.setItem('book', this.book);
+      // localStorage.chapter = this.chapter;
+      // localStorage.verse = this.verse;
+      // localStorage.numberOfChapters = this.numberOfChapters;
+      // localStorage.numberOfChapterVerses = this.numberOfChapterVerses;
+      // localStorage.language1 = this.language1;
+      // localStorage.language2 = this.language2;
+      // localStorage.language1VerseNumber = this.language1VerseNumber;
+      // localStorage.language2VerseNumber = this.language2VerseNumber;
+      // localStorage.textDirection = this.textDirection;
+      // localStorage.prevDisabled = this.prevDisabled;
+      // localStorage.nextDisabled = this.nextDisabled;
+
+      const dataToSave = [
+        'book', 'chapter', 'verse', 'numberOfChapters', 'numberOfChapterVerses',
+        'language1', 'language2', 'language1VerseNumber', 'language2VerseNumber',
+        'textDirection', 'prevDisabled', 'nextDisabled'
+      ];
+      
+      dataToSave.forEach(key => localStorage[key] = this[key]);
     },
 
     clearSettings: function(){
@@ -191,7 +199,6 @@ var app = new Vue({
         if(this.books[key].book == this.book){
           this.numberOfChapters = this.books[key].chapters.length;
           this.numberOfChapterVerses = parseInt(this.books[key].chapters[this.chapter - 1].verses); // verses from the first chapter
-          //console.log(this.books[key].chapters[this.chapter -1 ].verses);
         }
       }
     },
@@ -274,7 +281,6 @@ var app = new Vue({
           // This won't work for us because our book format is for example Genesis, so we can just use the first key
           const dynamicKey = Object.keys(json)[0];
           const data = json[dynamicKey];
-          console.log(data);
 
           if (data.verses) {
             app.book = data.book_name; 
@@ -306,7 +312,6 @@ var app = new Vue({
           // This won't work for us because our book format is for example Genesis, so we can just use the first key
           const dynamicKey = Object.keys(json)[0];
           const data = json[dynamicKey];
-          console.log(data);
 
           if (data.verses) {
             app.book = data.book_name; 
@@ -328,8 +333,10 @@ var app = new Vue({
 
 </script>
 <!-- Bootstrap requirements -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
 
 </body>
 </html>
