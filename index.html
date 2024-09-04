@@ -39,13 +39,13 @@
 
 	<div class="card">
 		<div v-bind:style="{direction: textDirection}" class="card-body">
-			<sup>{{language1VerseNumber}} </sup>{{language1Verse}}{{error}}
+			<sup>{{language1VerseNumber}} </sup>{{language1Verse}} {{error}}
 		</div>
 	</div>
 
 	<div class="card mt-2 mb-2">
 		<div v-bind:style="{direction: textDirection}" class="card-body">
-			<sup>{{language2VerseNumber}} </sup>{{language2Verse}}{{error}}
+			<sup>{{language2VerseNumber}} </sup>{{language2Verse}} {{error}}
 		</div>
 	</div>
 
@@ -108,7 +108,7 @@
 
 <!-- Layout of the Bible - Books/Chapters/Verses Source = https://github.com/bkuhl/bible-verse-counts-per-chapter/blob/master/bible.json -->
 <script src="js/bible.min.js"></script>
-<script src="js/api-languages.min.js"></script>
+<script src="js/api-languages-v2.min.js"></script>
 
 <script>
 // app.$data.bibleContent is avaiable from js/bible.min.js
@@ -168,9 +168,9 @@ var app = new Vue({
 		// Save data properties to web storage
 		saveSettings: function(){
 				const dataToSave = [
-				'book', 'chapter', 'verse', 'numberOfChapters', 'numberOfChapterVerses',
-				'language1', 'language2', 'language1VerseNumber', 'language2VerseNumber',
-				'textDirection', 'prevDisabled', 'nextDisabled'
+					'book', 'chapter', 'verse', 'numberOfChapters', 'numberOfChapterVerses',
+					'language1', 'language2', 'language1VerseNumber', 'language2VerseNumber',
+					'textDirection', 'prevDisabled', 'nextDisabled'
 			];
 		
 			dataToSave.forEach(key => localStorage[key] = this[key]);
@@ -247,7 +247,7 @@ var app = new Vue({
 
 			this.language1Verse = 'Loading...';
 			this.language2Verse = 'Loading...';
-
+			const errorNothingReturned = "Nothing was returned. There might not be a translation for this book or chapter for this language";
 
 			// Language 1 request
 
@@ -256,7 +256,7 @@ var app = new Vue({
 			fetch(lang1_url)
 			.then(response => {
 				if (!response.ok) {
-				throw new Error('Network response was not ok');
+					throw new Error('Network response was not ok');
 				}
 				return response.json();
 			})
@@ -270,14 +270,14 @@ var app = new Vue({
 				const data = json[dynamicKey];
 
 				if (data.verses) {
-				app.book = data.book_name; 
-				app.chapter = parseInt(data.chapter, 10); 
-				app.language1Verse = data.verses[0].text;
-				app.language1VerseNumber = parseInt(data.verses[0].verse, 10);
+					app.book = data.book_name; 
+					app.chapter = parseInt(data.chapter, 10); 
+					app.language1Verse = data.verses[0].text;
+					app.language1VerseNumber = parseInt(data.verses[0].verse, 10);
 				}
 			})
 			.catch(() => {
-				app.error = 'Nothing was returned, please try again!';
+				app.language1Verse = errorNothingReturned;
 			});
 
 			// Language 2 request 
@@ -287,7 +287,7 @@ var app = new Vue({
 			fetch(lang2_url)
 			.then(response => {
 				if (!response.ok) {
-				throw new Error('Network response was not ok');
+					throw new Error('Network response was not ok');
 				}
 				return response.json();
 			})
@@ -301,14 +301,14 @@ var app = new Vue({
 				const data = json[dynamicKey];
 
 				if (data.verses) {
-				app.book = data.book_name; 
-				app.chapter = parseInt(data.chapter, 10); 
-				app.language2Verse = data.verses[0].text;
-				app.language2VerseNumber = parseInt(data.verses[0].verse, 10);
+					// app.book = data.book_name; 
+					app.chapter = parseInt(data.chapter, 10); 
+					app.language2Verse = data.verses[0].text;
+					app.language2VerseNumber = parseInt(data.verses[0].verse, 10);
 				}
 			})
 			.catch(() => {
-				app.error = 'Nothing was returned, please try again!';
+				app.language2Verse = errorNothingReturned;
 			});
 		},
 	},
@@ -316,6 +316,7 @@ var app = new Vue({
 
 </script>
 <!-- Bootstrap requirements -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
 
 </body>
